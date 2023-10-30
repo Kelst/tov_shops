@@ -1,4 +1,6 @@
 const queryDatabase = require("../tools/tools");
+const imgur = require('imgur-upload')
+const fs = require('fs');
 
 class GoodsController {
   //додати товар
@@ -154,7 +156,25 @@ class GoodsController {
       }
 
     }
+
+   async  storage (req,res,next){
+    const url=`/home/vladb/tovar_app/server/uploads/${req.file.filename}`
+
+  try {
     
+   
+    imgur.setClientID('ea3d24f4eb41b81');
+   imgur.upload(url,function(err, ress){
+	console.log(ress.data.link); //log the imgur url
+    fs.unlinkSync(url);
+    res.json(ress.data.link)
+});
+    
+}catch (error) {
+    console.log("Errror added photo");
+    res.json(false)
+  }
+   } 
     
 
    

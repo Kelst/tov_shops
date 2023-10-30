@@ -37,7 +37,7 @@ router.put("/delete-good",checkAuthorization,GoodsController.deleteGood)
  router.get("/get-all-cat",checkAuthorization,GoodsController.getAllCat)
  router.put("/update-cat",checkAuthorization,GoodsController.updateCategory)
  router.put("/delete-cat",checkAuthorization,GoodsController.deleteCategory)
-// router.post("/storage" , upload.single('file') ,GoodsController.storageGoogle)
+ router.post("/storage" , upload.single('file') ,GoodsController.storage)
 
 
 
