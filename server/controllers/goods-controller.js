@@ -1,6 +1,7 @@
 const queryDatabase = require("../tools/tools");
 const imgur = require('imgur-upload')
 const fs = require('fs');
+const { log } = require("console");
 
 class GoodsController {
   //додати товар
@@ -33,10 +34,13 @@ class GoodsController {
     async updateGood(req,res,next){
         try {
           const {id,id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques}=req.body;
+                console.log(req.body);
+       
           // res.json({id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques});
           let sql=`UPDATE shop_goods
           SET  id_cat="${id_cat}", name = "${name}", cost = "${cost}", text = "${text}", quantity = "${quantity}", url = "${url}", title = "${title}", state = "${state}", unique_price = "${unique_price}", uniques =  "${uniques}"
           WHERE id = "${id}";`
+          console.log(sql);
           let response=await queryDatabase(sql)
           console.log(response);
           return res.json({
@@ -63,7 +67,7 @@ class GoodsController {
           const {id}=req.body;
           // res.json({id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques});
           let sql=`UPDATE shop_goods
-          SET  state = "1"
+          SET  state = "0"
           WHERE id = "${id}";`
           let response=await queryDatabase(sql)
           console.log(response);
@@ -77,6 +81,21 @@ class GoodsController {
           console.log("Error Delete Goods");
           return res.json(false)
         }
+    }
+    async getAllGoodsByCat(req,res,next){
+        try {
+            const {id_cat}=req.body;
+        
+            const data=await queryDatabase(`SELECT * FROM shop_goods where id_cat='${id_cat}' and state= "1"`)
+          if(id_cat==2){
+            console.log(data);
+          }
+          
+            return res.json(data)
+          } catch (error) {
+            console.log(error);
+            return res.json([])
+          }
     }
     async getAllGoods(req,res,next){
       try {
@@ -134,6 +153,7 @@ class GoodsController {
               UPDATE shop_cat
               SET  state="${0}" where id=${id}
               `
+              console.log(sql);
               let response=await queryDatabase(sql)
               return res.json({
                 id:response.insertId,
@@ -149,7 +169,7 @@ class GoodsController {
 
     async getAllCat(req,res,next){
       try {
-        const data=await queryDatabase("SELECT * FROM shop_cat")
+        const data=await queryDatabase("SELECT * FROM shop_cat where state='1'")
         return res.json(data)
       } catch (error) {
         return res.json(false)
@@ -159,7 +179,9 @@ class GoodsController {
 
    async  storage (req,res,next){
     const url=`/home/vladb/tovar_app/server/uploads/${req.file.filename}`
+    const {value}=req.body;
 
+    console.log(value);
   try {
     
    

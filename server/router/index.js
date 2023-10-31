@@ -1,5 +1,6 @@
 const Router =require("express").Router
 const GoodsController = require("../controllers/goods-controller");
+const userController = require("../controllers/user-controller");
 const UserController=require("../controllers/user-controller");
 const multer = require('multer');
 
@@ -33,11 +34,15 @@ router.get("/get-all-goods",checkAuthorization,GoodsController.getAllGoods)
 router.put("/update-good",checkAuthorization,GoodsController.updateGood)
 router.put("/delete-good",checkAuthorization,GoodsController.deleteGood)
 
+router.post("/get-all-goods-by-cat",GoodsController.getAllGoodsByCat)
+
+
  router.post("/add-cat",checkAuthorization,GoodsController.addCategory)
  router.get("/get-all-cat",checkAuthorization,GoodsController.getAllCat)
  router.put("/update-cat",checkAuthorization,GoodsController.updateCategory)
  router.put("/delete-cat",checkAuthorization,GoodsController.deleteCategory)
  router.post("/storage" , upload.single('file') ,GoodsController.storage)
+ router.post("/logIn" , upload.single('file') ,userController.login)
 
 
 
