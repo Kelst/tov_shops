@@ -13,12 +13,10 @@ const cors = require('cors'); // Подключаем пакет cors
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cors(
-  {
-    origin: 'http://localhost:5173',  // Replace with your allowed origin
-    credentials: true,
-  }
-  ))
+app.use(cors({
+  origin:[ 'https://shop-int-telegram.pp.ua','http://194.8.147.150:4002','http://localhost:5173','http://localhost:5175','https://shop-intelekt.pp.ua','http://shop-intelekt.pp.ua:4003','https://shop-int-telegram.pp.ua/:1','https://shop-int-telegram.pp.ua/'], // Замість '*' вкажіть джерело (origin), з якого надходять запити
+  credentials: true,
+}));
 app.use(express.json())
 
   const port = 4001; 

@@ -2,6 +2,8 @@ const queryDatabase = require("../tools/tools");
 const imgur = require('imgur-upload')
 const fs = require('fs');
 const { log } = require("console");
+const { default: axios } = require("axios");
+
 
 class GoodsController {
   //додати товар
@@ -113,7 +115,7 @@ class GoodsController {
         try {
           const {cat,state}=req.body;
           let sql=`INSERT INTO shop_cat (cat, state)
-          VALUES ("${cat}", "${state}")`
+          VALUES ("${cat}", "${1}")`
           let response=await queryDatabase(sql)
           return res.json({
             id:response.insertId,
@@ -177,6 +179,18 @@ class GoodsController {
 
     }
 
+async getPhone(req,res,next){
+  const {id}=req.body;
+  try {
+    const data=await queryDatabase(`SELECT 	phone_number FROM client_chats_id where 	user_chat_id ='${id}'`)
+    if(data.length!=0){
+      return res.json('380'+data[0].phone_number)
+    }else
+    return res.json(false)
+  } catch (error) {
+    return res.json(false)
+  }
+}
    async  storage (req,res,next){
     const url=`/home/vladb/tovar_app/server/uploads/${req.file.filename}`
     const {value}=req.body;
@@ -197,7 +211,61 @@ class GoodsController {
     res.json(false)
   }
    } 
+    async createOrder(req,res,data){
+      // {
+      //   name: 'Безкоровайний Владислав ',
+      //   phone: '380951470082',
+      //   telegram_id: 5036942123,
+      //   cart: [
+      //     { name: 'Totolink N300RT', cost: 460, count: 2 },
+      //     { name: 'Xiomi power', cost: 100, count: 1 }
+      //   ],
+      //   adress: '',
+      //   sum: 900,
+      //   comment: ''
+      // }
+      try {
+        const {order}=req.body;
+        const token = '6707083370:AAH6hqQZpLd95vcfITDTotbKzpQnWkVX-AA';
+        const userId =order.telegram_id;
+        
+        // URL Telegram Bot API
+        const apiUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+        function formatCart(cart) {
+          return cart.map(item => `Назва: ${item.name}, Кількість: ${item.count}, Вартість: ${item.cost} грн`).join('\n');
+        }
+        
+        // Формування тексту повідомлення
+        const messageText = `
+        Привіт, це тестове повідомлення!
+        
+        Ім'я: ${order.name}
+        Телефон: ${order.phone}
+        Адреса: ${order.adress}
+        Кошик:
+        ${formatCart(order.cart)}
+        Загальна сума: ${order.sum} грн
+        Коментар: ${order.comment}
+        `;
+             
+        axios.post(apiUrl, {
+          chat_id: userId,
+          text: messageText,
+        })
+          .then(response => {
+            console.log('Відповідь від Telegram API:', response.data);
+          })
+          .catch(error => {
+            console.error('Помилка відправки запиту:', error);
+          });
     
+      console.log(order);
+return res.json(true)
+} catch (error) {
+  return res.json(false)
+    
+}
+    }
 
    
 }

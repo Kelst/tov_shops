@@ -35,6 +35,8 @@ router.put("/update-good",checkAuthorization,GoodsController.updateGood)
 router.put("/delete-good",checkAuthorization,GoodsController.deleteGood)
 
 router.post("/get-all-goods-by-cat",GoodsController.getAllGoodsByCat)
+router.post("/get-phone",checkAuthorization,GoodsController.getPhone)
+router.post("/create-order",checkAuthorization,GoodsController.createOrder)
 
 
  router.post("/add-cat",checkAuthorization,GoodsController.addCategory)
