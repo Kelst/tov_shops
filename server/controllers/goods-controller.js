@@ -11,6 +11,7 @@ class GoodsController {
     async addGood(req,res,next){
         try {
           const {id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques}=req.body;
+          console.log(id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques);
           // res.json({id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques});
           let sql=`INSERT INTO shop_goods (id_cat, name, cost, text, quantity, url, title, state, unique_price, uniques)
           VALUES ("${id_cat}", "${name}", "${cost}", "${text}", "${quantity}", "${url}", "${title}","${state}", "${unique_price}", "${uniques}")`
@@ -18,15 +19,15 @@ class GoodsController {
           return res.json({
             id:response.insertId,
             id_cat: id_cat,
-            name: name,
-            cost: cost,
-            text: text,
-            quantity: quantity,
-            url: url,
-            title:title,
-            state: state,
-            unique_price: unique_price,
-            uniques: uniques
+            name: name||"",
+            cost: cost||0,
+            text: text||"",
+            quantity: quantity||1,
+            url: url||"",
+            title:title||"",
+            state: state||"",
+            unique_price: unique_price||0,
+            uniques: uniques||1
         })
         } catch (error) {
           console.log("Error Added Goods");
@@ -42,9 +43,9 @@ class GoodsController {
           let sql=`UPDATE shop_goods
           SET  id_cat="${id_cat}", name = "${name}", cost = "${cost}", text = "${text}", quantity = "${quantity}", url = "${url}", title = "${title}", state = "${state}", unique_price = "${unique_price}", uniques =  "${uniques}"
           WHERE id = "${id}";`
-          console.log(sql);
+          // console.log(sql);
           let response=await queryDatabase(sql)
-          console.log(response);
+          // console.log(response);
           return res.json({
             id:response.insertId,
             id_cat: id_cat,
@@ -64,6 +65,62 @@ class GoodsController {
           return res.json(false)
         }
     }
+    async updateOrder(req, res, next) {
+      try {
+          const { order } = req.body;
+          // console.log(req.body);
+  
+          const {
+              id,
+              name,
+              novaPoshta,
+              phone,
+              telegram_id,
+              cart_json,
+              address,
+              sum,
+              comment,
+              status
+          } = order;
+            const hs=cart_json
+          let sql = `
+          UPDATE orders_shop_telegram
+          SET 
+              name = "${name}",
+              nova_poshta = "${novaPoshta}",
+              phone = "${phone}",
+              telegram_id = "${telegram_id}",
+              cart_json = '${hs}',
+              address = '${address}',
+              sum = "${sum}",
+              comment = "${comment}",
+              status = "${status}"
+          WHERE id = "${id}";
+          `;
+  
+          console.log(sql);
+  
+          let response = await queryDatabase(sql);
+          // console.log(response);
+  
+          return res.json({
+              id: response.insertId,
+              name,
+              novaPoshta,
+              phone,
+              telegram_id,
+              cart_json,
+              address,
+              sum,
+              comment,
+              status
+          });
+      } catch (error) {
+          console.log(error);
+          console.log("Error updating order");
+          return res.json(false);
+      }
+  }
     async deleteGood(req,res,next){
         try {
           const {id}=req.body;
@@ -72,7 +129,7 @@ class GoodsController {
           SET  state = "0"
           WHERE id = "${id}";`
           let response=await queryDatabase(sql)
-          console.log(response);
+          // console.log(response);
           return res.json({
             
             id:response.insertId,
@@ -84,13 +141,34 @@ class GoodsController {
           return res.json(false)
         }
     }
+    async deleteOrder(req,res,next){
+      try {
+        const {id}=req.body;
+        // console.log(id);
+        // res.json({id_cat,name,cost,text,quantity,url,title,state,unique_price,uniques});
+        let sql=`UPDATE orders_shop_telegram
+        SET  delete_flag = "1"
+        WHERE id = "${id}";`
+        let response=await queryDatabase(sql)
+        console.log(response);
+        return res.json({
+          
+          id:response.insertId,
+          
+      })
+      } catch (error) {
+          console.log(error);
+        console.log("Error Delete Goods");
+        return res.json(false)
+      }
+  }
     async getAllGoodsByCat(req,res,next){
         try {
             const {id_cat}=req.body;
         
             const data=await queryDatabase(`SELECT * FROM shop_goods where id_cat='${id_cat}' and state= "1"`)
           if(id_cat==2){
-            console.log(data);
+            // console.log(data);
           }
           
             return res.json(data)
@@ -99,9 +177,63 @@ class GoodsController {
             return res.json([])
           }
     }
+    async getAllOrdersByCat(req,res,next){
+      try {
+          const {id_cat}=req.body;
+      
+          const data=await queryDatabase(`SELECT * FROM orders_shop_telegram where status='${id_cat}' and delete_flag='0'`)
+       
+        
+          return res.json(data)
+        } catch (error) {
+          console.log(error);
+          return res.json([])
+        }
+  }
+  async getOrder(req,res,next){
+    try {
+        const {id}=req.body;
+    
+        const data=await queryDatabase(`SELECT * FROM orders_shop_telegram where id='${id}' `)
+    //  console.log(data);
+      
+        return res.json(data)
+      } catch (error) {
+        console.log(error);
+        return res.json([])
+      }
+}
+async getOrderTelegram(req,res,next){
+  try {
+      const {id}=req.body;
+     
+  
+      const data=await queryDatabase(`SELECT * FROM orders_shop_telegram where 	telegram_id='${id}' and delete_flag='0' `)
+
+    
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+      return res.json([])
+    }
+}
+
+
+    
+
     async getAllGoods(req,res,next){
       try {
         const data=await queryDatabase("SELECT * FROM shop_goods")
+        return res.json(data)
+      } catch (error) {
+        console.log(error);
+        return res.json(false)
+      }
+
+    }
+    async getAllGoodsUnique(req,res,next){
+      try {
+        const data=await queryDatabase("SELECT * FROM shop_goods where unique_price!='0' and state= '1' ")
         return res.json(data)
       } catch (error) {
         console.log(error);
@@ -155,7 +287,7 @@ class GoodsController {
               UPDATE shop_cat
               SET  state="${0}" where id=${id}
               `
-              console.log(sql);
+              // console.log(sql);
               let response=await queryDatabase(sql)
               return res.json({
                 id:response.insertId,
@@ -174,6 +306,7 @@ class GoodsController {
         const data=await queryDatabase("SELECT * FROM shop_cat where state='1'")
         return res.json(data)
       } catch (error) {
+        console.log(error,"getAllCat");
         return res.json(false)
       }
 
@@ -195,13 +328,13 @@ async getPhone(req,res,next){
     const url=`/home/vladb/tovar_app/server/uploads/${req.file.filename}`
     const {value}=req.body;
 
-    console.log(value);
+    // console.log(value);
   try {
     
    
     imgur.setClientID('ea3d24f4eb41b81');
    imgur.upload(url,function(err, ress){
-	console.log(ress.data.link); //log the imgur url
+	// console.log(ress.data.link); //log the imgur url
     fs.unlinkSync(url);
     res.json(ress.data.link)
 });
@@ -211,62 +344,111 @@ async getPhone(req,res,next){
     res.json(false)
   }
    } 
-    async createOrder(req,res,data){
-      // {
-      //   name: 'Безкоровайний Владислав ',
-      //   phone: '380951470082',
-      //   telegram_id: 5036942123,
-      //   cart: [
-      //     { name: 'Totolink N300RT', cost: 460, count: 2 },
-      //     { name: 'Xiomi power', cost: 100, count: 1 }
-      //   ],
-      //   adress: '',
-      //   sum: 900,
-      //   comment: ''
-      // }
+    async createOrder (req,res,data){
+ 
       try {
         const {order}=req.body;
+        const jsData=  order.cart
         const token = '6707083370:AAH6hqQZpLd95vcfITDTotbKzpQnWkVX-AA';
         const userId =order.telegram_id;
-        
-        // URL Telegram Bot API
-        const apiUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-        function formatCart(cart) {
-          return cart.map(item => `Назва: ${item.name}, Кількість: ${item.count}, Вартість: ${item.cost} грн`).join('\n');
-        }
-        
-        // Формування тексту повідомлення
-        const messageText = `
-        Привіт, це тестове повідомлення!
-        
-        Ім'я: ${order.name}
-        Телефон: ${order.phone}
-        Адреса: ${order.adress}
-        Кошик:
-        ${formatCart(order.cart)}
-        Загальна сума: ${order.sum} грн
-        Коментар: ${order.comment}
-        `;
-             
-        axios.post(apiUrl, {
-          chat_id: userId,
-          text: messageText,
-        })
-          .then(response => {
-            console.log('Відповідь від Telegram API:', response.data);
-          })
-          .catch(error => {
-            console.error('Помилка відправки запиту:', error);
-          });
+        console.log(order);
+        const sql = `
+        INSERT INTO orders_shop_telegram (name, phone, telegram_id, cart_json, address, sum, comment, status)
+        VALUES (
+          '${order.name}',
+          '${order.phone}',
+          '${order.telegram_id}',
+          '${jsData}',
+          '${order.adress}',
+          '${order.sum}',
+          '${order.comment}',
+          0
+        );
+      `;
+        let response=await queryDatabase(sql)
+// URL Telegram Bot API
+const apiUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+const urlOrder = `https://shop-intelekt.pp.ua/order/${response.insertId}`;
+
+// Формування тексту повідомлення з використанням Markdown
+const messageText = `
+Привіт!
+Це інформація про твоє замовлення:
+
+*Ім'я:* ${order.name}
+*Телефон:* ${order.phone}
+*Адреса:* ${order.adress}
+
+Кошик:
+${order.cart}
+
+**Загальна сума:** ${order.sum} грн
+
+*Коментар:* 
+${order.comment}
+`;
+
+axios.post(apiUrl, {
+  chat_id: userId,
+  text: messageText,
+  parse_mode: 'Markdown', // Додаємо параметр parse_mode для коректного відображення Markdown
+})
+  .then(response => {
+    // console.log('Відповідь від Telegram API:', response.data);
+  })
+  .catch(error => {
+    console.error('Помилка відправки запиту:', error);
+});
+
+// Відправка URL замовлення в інший чат
+axios.post(apiUrl, {
+  chat_id: '-1002074871055',
+  text: `[Посилання на замовлення N ${response.insertId}](${urlOrder})`, // Додаємо URL у вигляді гіперпосилання
+  parse_mode: 'Markdown',
+})
+  .then(response => {
+    // console.log('Відповідь від Telegram API:', response.data);
+  })
+  .catch(error => {
+    console.error('Помилка відправки запиту:', error);
+});
     
-      console.log(order);
-return res.json(true)
+      // console.log(order);
+ return res.json(true)
 } catch (error) {
+  console.log(error);
   return res.json(false)
     
 }
     }
+async moveOrderUP(req,res,next){
+  const {id,state}=req.body;
+  try {
+    
+ 
+  const sql=`UPDATE orders_shop_telegram set status='${1}' where id='${id}'`
+  let response=await queryDatabase(sql) 
+  return true
 
+} catch (error) {
+  console.log(error);
+    return false
+  }
+}
+async moveOrderDone(req,res,next){
+  const {id,state}=req.body;
+  try {
+    
+ 
+  const sql=`UPDATE orders_shop_telegram set status='${2}' where id='${id}'`
+  let response=await queryDatabase(sql) 
+  return true
+
+} catch (error) {
+  console.log(error);
+    return false
+  }
+}
    
 }
 module.exports= new GoodsController()
